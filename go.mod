@@ -6,7 +6,7 @@ require (
 	github.com/Mastercard/terraform-provider-restapi v1.18.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
-	github.com/smuriana/terraform-provider-apirest v0.0.4
+	github.com/smuriana/terraform-provider-apirest v0.0.12
 	golang.org/x/oauth2 v0.4.0
 	golang.org/x/time v0.3.0
 )
