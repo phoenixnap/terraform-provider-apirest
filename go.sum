@@ -161,8 +161,8 @@ github.com/sebdah/goldie v1.0.0/go.mod h1:jXP4hmWywNEwZzhMuv2ccnqTSFpuq8iyQhtQdk
 github.com/sergi/go-diff v1.1.0/go.mod h1:STckp+ISIX8hZLjrqAeVduY0gWCT9IjLuqbuNXdaHfM=
 github.com/sergi/go-diff v1.2.0 h1:XU+rvMAioB0UC3q1MFrIQy4Vo5/4VsRDQQXHsEya6xQ=
 github.com/sirupsen/logrus v1.4.1/go.mod h1:ni0Sbl8bgC9z8RoU9G6nDWqqs/fq4eDPysMBDgk/93Q=
-github.com/smuriana/terraform-provider-apirest v0.0.4 h1:Y40yKVgTd4nykwmjMN2j+rpwBNjRZOJIa3980MPkRHU=
-github.com/smuriana/terraform-provider-apirest v0.0.4/go.mod h1:AVe0T/MrZfl7uPlTs4ZOet/7VlfRVpWVIQLzVpDIOx8=
+github.com/smuriana/terraform-provider-apirest v0.0.14 h1:svRgPBVnHD2pgAUP8Qtlu4fr5xwps/hxGttTPCp/NtI=
+github.com/smuriana/terraform-provider-apirest v0.0.14/go.mod h1:3/c2zTpz0Fiyr2XQSZ1l7KpZNUNBkClYgKubw7O92dI=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
