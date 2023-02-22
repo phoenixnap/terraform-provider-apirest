@@ -189,10 +189,13 @@ func resourceRestAPI() *schema.Resource {
 	}
 }
 
-/* Since there is nothing in the ResourceData structure other
-   than the "id" passed on the command line, we have to use an opinionated
-   view of the API paths to figure out how to read that object
-   from the API */
+/*
+	 Since there is nothing in the ResourceData structure other
+
+		than the "id" passed on the command line, we have to use an opinionated
+		view of the API paths to figure out how to read that object
+	   from the API
+*/
 func resourceRestAPIImport(d *schema.ResourceData, meta interface{}) (imported []*schema.ResourceData, err error) {
 	input := d.Id()
 
@@ -277,28 +280,56 @@ func resourceRestAPIRead(d *schema.ResourceData, meta interface{}) error {
 		/* Setting terraform ID tells terraform the object was created or it exists */
 		log.Printf("resource_api_object.go: Read resource. Returned id is '%s'\n", obj.id)
 		id_to_set := obj.id
+		inconsistents := getInconsistents(d.Get("tracked_keys"), obj)
 
-		inconsistent_keys := make([]string, 0)
-
-		if iTrackedKeys := d.Get("tracked_key"); iTrackedKeys != nil {
-			for _, v := range iTrackedKeys.([]interface{}) {
-				trackedKey := v.(string)
-				if _, apiValue := obj.apiData[trackedKey]; apiValue {
-					if obj.data[trackedKey] != obj.apiData[trackedKey] {
-						inconsistent_keys = append(inconsistent_keys, trackedKey)
-					}
-				}
-			}
-		}
-
-		if len(inconsistent_keys) > 0 {
-			return fmt.Errorf("Terraform state corrupted, keys [%s]", strings.Join(inconsistent_keys, ", "))
+		if len(inconsistents) > 0 {
+			return fmt.Errorf("Terraform state corrupted, keys [%s]", strings.Join(inconsistents, ", "))
 		}
 
 		/* Setting terraform ID tells terraform the object was created or it exists */
 		d.SetId(id_to_set)
 	}
 	return err
+}
+
+func getInconsistents(trackedKeys interface{}, obj *APIObject) []string {
+	inconsistent_keys := []string{}
+	if trackedKeys != nil {
+		for _, v := range trackedKeys.([]interface{}) {
+			trackedKey := v.(string)
+			dataValue, dataFound := searchKey(obj.data, trackedKey)
+			apiDataValue, apiDataFound := searchKey(obj.apiData, trackedKey)
+			if obj.apiClient.debug {
+				if !dataFound {
+					log.Printf("resource_api_object.go: Key '%s' not found in data Json\n", trackedKey)
+				}
+				if !apiDataFound {
+					log.Printf("resource_api_object.go: Key '%s' not found in api data Json\n", trackedKey)
+				}
+			}
+			if (dataFound && apiDataFound) && (dataValue != apiDataValue) {
+				if obj.apiClient.debug {
+					log.Printf("resource_api_object.go: tracked_key='%s', data='%s', api_data='%s'\n", trackedKey, obj.data[trackedKey], obj.apiData[trackedKey])
+				}
+				inconsistent_keys = append(inconsistent_keys, trackedKey)
+			}
+		}
+	}
+	return inconsistent_keys
+}
+
+func searchKey(data map[string]interface{}, key string) (interface{}, bool) {
+	for k, v := range data {
+		if k == key {
+			return v, true
+		}
+		if submap, ok := v.(map[string]interface{}); ok {
+			if val, found := searchKey(submap, key); found {
+				return val, found
+			}
+		}
+	}
+	return nil, false
 }
 
 func resourceRestAPIUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -364,10 +395,13 @@ func resourceRestAPIExists(d *schema.ResourceData, meta interface{}) (exists boo
 	return exists, err
 }
 
-/* Simple helper routine to build an api_object struct
-   for the various calls terraform will use. Unfortunately,
-   terraform cannot just reuse objects, so each CRUD operation
-   results in a new object created */
+/*
+	 Simple helper routine to build an api_object struct
+
+		for the various calls terraform will use. Unfortunately,
+		terraform cannot just reuse objects, so each CRUD operation
+	   results in a new object created
+*/
 func makeAPIObject(d *schema.ResourceData, meta interface{}) (*APIObject, error) {
 	opts, err := buildAPIObjectOpts(d)
 	if err != nil {
@@ -442,13 +476,20 @@ func buildAPIObjectOpts(d *schema.ResourceData) (*apiObjectOpts, error) {
 		opts.queryString = v.(string)
 	}
 
+	opts.trackedKeys = expandTrackedKey(d.Get("tracked_keys").([]interface{}))
 	readSearch := expandReadSearch(d.Get("read_search").(map[string]interface{}))
 	opts.readSearch = readSearch
-
 	opts.data = d.Get("data").(string)
 	opts.debug = d.Get("debug").(bool)
 
 	return opts, nil
+}
+
+func expandTrackedKey(arr []interface{}) (trackedKeys []string) {
+	for _, v := range arr {
+		trackedKeys = append(trackedKeys, v.(string))
+	}
+	return
 }
 
 func expandReadSearch(v map[string]interface{}) (readSearch map[string]string) {
